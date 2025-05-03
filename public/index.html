@@ -3,16 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <title>MyCoin Miner</title>
+  <style>
+    pre {
+      margin:0;
+    }
+    pre#logTry {
+      margin:10px 0;
+    }
+  </style>
 </head>
 <body>
   <h1>MyCoin 浏览器挖矿</h1>
   <button id="mine">开始挖矿</button>
+  <pre id="logTry"></pre>
   <pre id="log"></pre>
 
   <script>
     document.getElementById('mine').onclick = async () => {
       const log = document.getElementById('log');
-      log.textContent = '获取任务中...';
+      const logTry = document.getElementById('logTry');
+      log.textContent = (log.textContent == '') ?  '获取任务中...' : log.textContent + '\n\n获取任务中...';
       const task = await fetch('http://localhost:3333/task').then(r => r.json());
       const target = '0'.repeat(task.difficulty);
       let nonce = 0;
@@ -26,7 +36,8 @@
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
         if (hashHex.startsWith(target)) {
-          log.textContent = `🎉 找到 nonce: ${nonce}\nhash: ${hashHex}`;
+          logTry.innerHTML = `nonce:`;
+          log.textContent += `🎉 找到 nonce: ${nonce}\nhash: ${hashHex}`;
           const res = await fetch('http://localhost:3333/submit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -38,7 +49,7 @@
         }
 
         nonce++;
-        if (nonce % 5000 === 0) log.textContent = `尝试中... nonce = ${nonce}`;
+        if (nonce % 5000 === 0) logTry.textContent = `nonce: 尝试中... ${nonce}`;
       }
     };
   </script>
